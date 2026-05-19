@@ -23,7 +23,7 @@ ENV NODE_ENV=development
 USER 1000:1000
 
 # Apply PNPM settings to be consistent with devcontainer
-RUN pnpm config set node-linker hoisted --location=user \
+RUN echo "node-linker=hoisted" >> ~/.npmrc \
     && pnpm config set store-dir /home/codespace/.pnpm-store --global
 
 EXPOSE 3000
