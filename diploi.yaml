@@ -1,0 +1,15 @@
+diploiVersion: v1.0
+type: component
+name: Node.js
+description: Official Diploi component for Node.js
+
+supportsAdditionalHosts: { serviceName: 'app'}
+
+hosts:
+  - name: Node.js
+    identifier: app
+    port: 3000
+
+images:
+  - identifier: app
+    prebuildImage: public.ecr.aws/p8t2q7f4/diploi/component-nodejs:[tag]

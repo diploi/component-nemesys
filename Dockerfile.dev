@@ -1,0 +1,32 @@
+# This will be set by the GitHub action to the folder containing this component.
+ARG FOLDER=/app
+
+FROM node:24.14.0-slim
+
+# Enable corepack
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
+
+# Setup PNPM
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN mkdir -p /home/codespace/.pnpm-store /pnpm \
+    && chown -R 1000:1000 /home/codespace/.pnpm-store /pnpm
+
+
+COPY . /app
+WORKDIR ${FOLDER}
+
+ENV NODE_ENV=development
+
+USER 1000:1000
+
+# Apply PNPM settings to be consistent with devcontainer
+RUN pnpm config set node-linker hoisted --global \
+    && pnpm config set store-dir /home/codespace/.pnpm-store --global
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["npm", "run", "dev"]
