@@ -1,30 +1,12 @@
 <img alt="icon" src=".diploi/icon.svg" width="32">
 
-# Node.js Component for Diploi
+# Nemesys Component for Diploi
 
-[![launch with diploi badge](https://diploi.com/launch.svg)](https://diploi.com/component/node)
-[![component on diploi badge](https://diploi.com/component.svg)](https://diploi.com/component/node)
-[![latest tag badge](https://badgen.net/github/tag/diploi/component-nodejs)](https://diploi.com/component/node)
-
-Start a demo environment (No card or registration needed)
-https://diploi.com/component/node
-
-A generic Node.js component that can be used to run any Node.js app.
+An internal component for Nemesys. Based on the [Node.js](https://github.com/diploi/component-nodejs) component that can be used to run any Node.js app.
 
 Uses the official [node](https://hub.docker.com/_/node) Docker image.
 
 ## Operation
-
-### Getting started
-
-1. In the Dashboard, click **Create Project +**
-2. Under **Pick Components**, choose **Node.js**
-3. In **Pick Add-ons**, you can add one or multiple databases to your app
-4. Choose **Create Repository**, which will generate a new GitHub repo
-5. Lastly, click **Launch Stack**
-
-Link to guide (includes additional information)
-https://diploi.com/blog/hosting_node_apps
 
 ### Development
 

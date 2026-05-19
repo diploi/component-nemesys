@@ -3,6 +3,8 @@ FROM node:24.14.0-slim AS base
 # This will be set by the GitHub action to the folder containing this component.
 ARG FOLDER=/app
 
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd openssh-client
+
 # Install dependencies only when needed
 FROM base AS deps
 

@@ -1,9 +1,9 @@
 diploiVersion: v1.0
 type: component
-name: Node.js
-description: Official Diploi component for Node.js
+name: Node.js (Nemesys)
+description: Internal Diploi component for Nemesys
 
-supportsAdditionalHosts: { serviceName: 'app'}
+supportsAdditionalHosts: { serviceName: 'app' }
 
 hosts:
   - name: Node.js
@@ -12,4 +12,4 @@ hosts:
 
 images:
   - identifier: app
-    prebuildImage: public.ecr.aws/p8t2q7f4/diploi/component-nodejs:[tag]
+    prebuildImage: public.ecr.aws/p8t2q7f4/diploi/component-nemesys:[tag]
