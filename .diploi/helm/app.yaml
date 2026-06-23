@@ -14,8 +14,8 @@ spec:
   {{- else }}
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
+      maxUnavailable: 0   # keep the OLD pod serving until the NEW one is Ready
+      maxSurge: 1         # 0-unavailable + 1-surge = zero-downtime even at 1 replica
   {{- end }}
   replicas: {{ ternary 1 0 .Values.enabled }}
   template:
@@ -23,7 +23,7 @@ spec:
       labels:
         app: app
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 30   # room for the preStop drain + Hapi connection drain
       imagePullSecrets:
         - name: diploi-pull-secret
       {{- if eq .Values.stage "development" }}
@@ -48,6 +48,56 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
+
+          {{- if .Values.hosts.app }}
+          # Probes only for components that actually bind :3000 (API, Web). The
+          # Migrator declares `hosts: []` and serves no HTTP — HTTP probes would
+          # fail it forever, so this whole block is gated out for it.
+
+          # startupProbe gates liveness+readiness during boot. ~2.5 min budget for
+          # the main process to listen (Hapi/Vite up + DB/Redis connect). The app
+          # serves WITHOUT subapps (sync finishes in the background after this
+          # passes), so do NOT size this to subapp builds.
+          startupProbe:
+            httpGet:
+              path: /healthz/startup
+              port: 3000
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 3
+
+          # readinessProbe = "send me traffic": up AND not draining. NOT gated on
+          # Postgres/Redis/subapps — on one replica a dependency blip or a broken
+          # subapp must not yank the only endpoint. This is the zero-downtime
+          # rollout gate and the shutdown drain signal.
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 3000
+            periodSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 3
+
+          # livenessProbe = "restart me if wedged": forgiving (~60s) so a busy
+          # moment never false-kills the single replica; answered from the main
+          # event loop, so it only trips on a real deadlock (or /tmp/app.unhealthy).
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 6
+            timeoutSeconds: 5
+
+          # preStop: flip readiness to 503 first so k8s removes this pod from the
+          # Service and in-flight requests drain, THEN SIGTERM. sleep < grace period.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "touch /tmp/app.draining; sleep 8"]
+          {{- end }}
+
           {{- if eq .Values.stage "development" }}
           workingDir: /app{{ .Values.folder }}
           {{- with .Values.containerCommands.developmentStart }}
